@@ -5,6 +5,8 @@ from random import choice
 import statistics 
 import time
 import copy
+import threading
+import tkinter as tk
 
 
 
@@ -372,3 +374,30 @@ def start_ui():
 
     root.after(10, new_puzzle, root, canvas_box, canvas_score, canvas_time, canvas_temp)
     root.mainloop()
+
+
+
+
+if __name__ == "__main__":
+    # initial unsolved sudoku
+    startingSudoku = """
+                        024007000
+                        600000000
+                        003680415
+                        431005000
+                        500000032
+                        790000060
+                        209710800
+                        040093000
+                        310004750
+                    """
+
+    sudoku = np.array([[int(i) for i in line] for line in startingSudoku.split()])
+    tmp_sudoku = copy.deepcopy(sudoku)
+    progress_score = [999]
+
+    #thread
+    solve_sudoku_thread = threading.Thread(target=start_algorithm, args=(sudoku, tmp_sudoku, progress_score))
+    solve_sudoku_thread.start()
+    start_ui()
+    solve_sudoku_thread.join()
