@@ -102,7 +102,7 @@ def plot_graph(canvas, fig, x_values, y_values):
     ax = fig.gca()
     ax.clear()
     ax.plot(x_values, y_values)
-    ax.set_xlabel('Time in ms')
+    ax.set_xlabel('Progress Iterations')
     ax.set_ylabel('Error Score')
     ax.set_title('Annealing Process')
     ax.grid(True)
