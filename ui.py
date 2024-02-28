@@ -1,5 +1,11 @@
 import tkinter as tk
+import matplotlib.pyplot as plt
+import sys
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
+
+x_plot = []
+y_plot = []
 
 
 def draw_grid(canvas):
@@ -54,7 +60,7 @@ def draw_value_bar(canvas, value):
 
 
 
-def new_puzzle(root, canvas_box, canvas_score, canvas_time, canvas_temp, tmp_sudoku, fixed_sudoku, current_score, sigma, solution_found, start_time, end_time):
+def new_puzzle(root, canvas_box, canvas_score, canvas_time, canvas_temp, canvas_graph, tmp_sudoku, fixed_sudoku, current_score, sigma, solution_found, start_time, end_time, canvas_plot, fig):
     canvas_box.delete("all")
     puzzle = tmp_sudoku[0]
     draw_numbers(canvas_box, puzzle, fixed_sudoku[0])
@@ -66,11 +72,41 @@ def new_puzzle(root, canvas_box, canvas_score, canvas_time, canvas_temp, tmp_sud
     sigma_v = sigma[0]
     draw_value_bar(canvas_temp, sigma_v)
 
-    if solution_found[0]:
+    global x_plot
+    global y_plot
+    y_plot.append(score)
+    if len(x_plot) == 0:
+        x_plot.append(1)
+    else:
+        x_plot.append(x_plot[-1]+1)
+    plot_graph(canvas_plot, fig, x_plot, y_plot)
+
+    if solution_found[0] and score == 0:
         draw_time(canvas_time, start_time, end_time)
 
-    if not solution_found[0]:
-        root.after(10, new_puzzle, root, canvas_box, canvas_score, canvas_time, canvas_temp, tmp_sudoku, fixed_sudoku, current_score, sigma, solution_found, start_time, end_time)
+    if not (solution_found[0] and score == 0):
+        root.after(1, new_puzzle, root, canvas_box, canvas_score, canvas_time, canvas_temp, canvas_graph, tmp_sudoku, fixed_sudoku, current_score, sigma, solution_found, start_time, end_time, canvas_plot, fig)
+
+
+
+def initialize_graph(canvas_graph):
+    fig, _ = plt.subplots()
+    canvas = FigureCanvasTkAgg(fig, master=canvas_graph)
+    canvas.draw()
+    canvas.get_tk_widget().pack()
+    return canvas, fig
+
+
+
+def plot_graph(canvas, fig, x_values, y_values):
+    ax = fig.gca()
+    ax.clear()
+    ax.plot(x_values, y_values)
+    ax.set_xlabel('Time in ms')
+    ax.set_ylabel('Error Score')
+    ax.set_title('Annealing Process')
+    ax.grid(True)
+    canvas.draw()
 
 
 
@@ -95,5 +131,18 @@ def start_ui(tmp_sudoku, fixed_sudoku, current_score, sigma, solution_found, sta
     canvas_temp.pack()
     canvas_temp.place(x=0, y=50)
 
-    root.after(10, new_puzzle, root, canvas_box, canvas_score, canvas_time, canvas_temp, tmp_sudoku, fixed_sudoku, current_score, sigma, solution_found, start_time, end_time)
+    canvas_graph = tk.Canvas(root, width=50, height=50)
+    canvas_graph.pack()
+    canvas_graph.place(x=150, y=50)
+
+    canvas_plot, fig = initialize_graph(canvas_graph)
+
+    root.after(1, new_puzzle, root, canvas_box, canvas_score, canvas_time, canvas_temp, canvas_graph, tmp_sudoku, fixed_sudoku, current_score, sigma, solution_found, start_time, end_time, canvas_plot, fig)
+
+    def close_window(root):
+        root.destroy()
+        sys.exit()
+
+    root.protocol("WM_DELETE_WINDOW", lambda: close_window(root))
+
     root.mainloop()
