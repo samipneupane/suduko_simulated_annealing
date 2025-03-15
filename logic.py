@@ -196,7 +196,7 @@ def annealing_sudoku(sigma, score, iterations, tmpSudoku, fixedSudoku, listOfBlo
             tmpSudoku[0] = newState[0][0] #updating sudoku
             scoreDiff = newState[1] 
             score[0] += scoreDiff  #updating score
-            #time.sleep(0.001)
+            time.sleep(0.0005)
             if score[0] == 0:
                 break
         
